@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>SQL JOIN 互動式教學</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{
+  margin:0;font-family:system-ui,-apple-system,"Noto Sans TC";
+  background:#0b1220;color:#e5e7eb
+}
+header{padding:20px;background:#111827;border-bottom:1px solid #1f2937}
+h1{margin:0;font-size:20px}
+.container{display:grid;grid-template-columns:320px 1fr;gap:16px;padding:16px}
+.panel{background:#111827;border:1px solid #1f2937;border-radius:14px}
+.panel h2{font-size:14px;margin:0;padding:12px;border-bottom:1px solid #1f2937}
+.panel .content{padding:12px}
+button{
+  background:#1f2937;color:#e5e7eb;border:1px solid #374151;
+  border-radius:10px;padding:8px 12px;cursor:pointer
+}
+button:disabled{opacity:.4}
+.step{margin-bottom:8px;width:100%;text-align:left}
+.active{border-color:#60a5fa}
+pre{background:#020617;padding:10px;border-radius:10px;overflow:auto}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+th,td{border:1px solid #1f2937;padding:6px;font-size:13px}
+th{background:#020617}
+.note{color:#9ca3af;font-size:13px;line-height:1.6}
+.badge{font-size:12px;color:#93c5fd}
+</style>
+</head>
+
+<body>
+<header>
+  <h1>SQL JOIN 互動式教學（INNER / OUTER / NATURAL / CROSS）</h1>
+</header>
+
+<div class="container">
+  <!-- 左側章節 -->
+  <div class="panel">
+    <h2>JOIN 教學章節</h2>
+    <div class="content" id="menu"></div>
+  </div>
+
+  <!-- 右側內容 -->
+  <div class="panel">
+    <h2 id="title">請選擇一個 JOIN 類型</h2>
+    <div class="content" id="main"></div>
+  </div>
+</div>
+
+<script>
+// ===== 模擬資料 =====
+const member = [
+ {mem_id:1,cname:'小華'},
+ {mem_id:2,cname:'小美'},
+ {mem_id:3,cname:'小強'},
+ {mem_id:4,cname:'小芳'},
+ {mem_id:5,cname:'小明'}
+];
+
+const product = [
+ {pro_id:1,productName:'iPhone'},
+ {pro_id:2,productName:'Nike Shoes'},
+ {pro_id:3,productName:'Coffee'}
+];
+
+const orders = [
+ {order_id:101,mem_id:1,pro_id:1,total_price:30000},
+ {order_id:102,mem_id:1,pro_id:2,total_price:9000},
+ {order_id:103,mem_id:2,pro_id:1,total_price:30000},
+ {order_id:104,mem_id:4,pro_id:3,total_price:600}
+];
+
+// ===== JOIN 示範資料 =====
+const lessons = [
+{
+ title:'INNER JOIN',
+ explain:'只顯示「兩邊都有對到資料」的紀錄',
+ sql:`SELECT o.order_id, m.cname, p.productName
+FROM orders o
+INNER JOIN member m ON o.mem_id = m.mem_id
+INNER JOIN product p ON o.pro_id = p.pro_id;`,
+ run(){
+  return orders.map(o=>{
+    const m=member.find(x=>x.mem_id===o.mem_id);
+    const p=product.find(x=>x.pro_id===o.pro_id);
+    return m && p ? {order:o.order_id,member:m.cname,product:p.productName}:null;
+  }).filter(Boolean);
+ }
+},
+{
+ title:'LEFT OUTER JOIN',
+ explain:'左邊表全部顯示，右邊沒資料就 NULL',
+ sql:`SELECT m.cname, o.order_id
+FROM member m
+LEFT JOIN orders o ON m.mem_id = o.mem_id;`,
+ run(){
+  let rows=[];
+  member.forEach(m=>{
+    const os=orders.filter(o=>o.mem_id===m.mem_id);
+    if(os.length===0) rows.push({member:m.cname,order:null});
+    else os.forEach(o=>rows.push({member:m.cname,order:o.order_id}));
+  });
+  return rows;
+ }
+},
+{
+ title:'RIGHT OUTER JOIN',
+ explain:'右邊表全部顯示（教學理解用）',
+ sql:`SELECT o.order_id, p.productName
+FROM orders o
+RIGHT JOIN product p ON o.pro_id = p.pro_id;`,
+ run(){
+  let rows=[];
+  product.forEach(p=>{
+    const os=orders.filter(o=>o.pro_id===p.pro_id);
+    if(os.length===0) rows.push({order:null,product:p.productName});
+    else os.forEach(o=>rows.push({order:o.order_id,product:p.productName}));
+  });
+  return rows;
+ }
+},
+{
+ title:'NATURAL JOIN',
+ explain:'自動用「同名欄位」JOIN（實務少用）',
+ sql:`SELECT *
+FROM orders
+NATURAL JOIN member;`,
+ run(){
+  return orders.map(o=>{
+    const m=member.find(x=>x.mem_id===o.mem_id);
+    return m?{order:o.order_id,member:m.cname}:null;
+  }).filter(Boolean);
+ }
+},
+{
+ title:'CROSS JOIN',
+ explain:'每一筆 × 每一筆（笛卡兒積）',
+ sql:`SELECT m.cname, p.productName
+FROM member m
+CROSS JOIN product p;`,
+ run(){
+  let rows=[];
+  member.forEach(m=>{
+    product.forEach(p=>{
+      rows.push({member:m.cname,product:p.productName});
+    });
+  });
+  return rows;
+ }
+}
+];
+
+// ===== UI =====
+const menu=document.getElementById('menu');
+const main=document.getElementById('main');
+const title=document.getElementById('title');
+
+lessons.forEach((l,i)=>{
+ const btn=document.createElement('button');
+ btn.className='step';
+ btn.textContent=l.title;
+ btn.onclick=()=>show(i);
+ menu.appendChild(btn);
+});
+
+function show(i){
+ const l=lessons[i];
+ title.textContent=l.title;
+ main.innerHTML=`
+ <div class="note">${l.explain}</div>
+ <div class="badge">SQL 範例</div>
+ <pre>${l.sql}</pre>
+ <button onclick="run(${i})">執行 JOIN</button>
+ <div id="result"></div>
+ `;
+}
+
+function run(i){
+ const rows=lessons[i].run();
+ let html='<table><tr>';
+ Object.keys(rows[0]).forEach(k=>html+=`<th>${k}</th>`);
+ html+='</tr>';
+ rows.forEach(r=>{
+  html+='<tr>';
+  Object.values(r).forEach(v=>html+=`<td>${v??'NULL'}</td>`);
+  html+='</tr>';
+ });
+ html+='</table>';
+ document.getElementById('result').innerHTML=html;
+}
+</script>
+</body>
+</html>
