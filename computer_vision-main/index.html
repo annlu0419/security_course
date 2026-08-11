@@ -30,7 +30,7 @@
 </div>
 <script>
   // 部署 Code.gs 後，將下方內容換成新的 GAS 網頁應用程式 /exec 網址。
-  const GAS_URL = "請貼上新的_GAS_網頁應用程式網址";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbwZMlyZu0jB5gq72PTq_OxgG3OUOobIxbwuV1MRUfMSRGx6RnLnaqd0ok6IeTgZ9eKC/exec";
   const quizData={allQ:[],currentIdx:0,score:0,correctCount:0,userAnswers:[],info:{}};
   const chapterSelect=document.getElementById('chapterSelect');
   for(let i=1;i<=14;i++){const option=document.createElement('option');option.value=i;option.textContent=`Chapter ${String(i).padStart(2,'0')}`;chapterSelect.appendChild(option)}
@@ -67,7 +67,7 @@
   async function showFinalResult(){
     document.getElementById('quizScreen').style.display='none';document.getElementById('resultScreen').style.display='block';const total=quizData.allQ.length;const correct=quizData.correctCount;const rate=`${((correct/total)*100).toFixed(1)}%`;document.getElementById('finalScore').textContent=`${quizData.score} 分`;document.getElementById('resId').textContent=quizData.info.id;document.getElementById('resAttempt').textContent=quizData.info.attempt;document.getElementById('resChap').textContent=quizData.info.chapterTitle;document.getElementById('resTotal').textContent=`${total} 題`;document.getElementById('resCorrect').textContent=`${correct} 題`;document.getElementById('resRate').textContent=rate;
     const payload={chapter:quizData.info.chapterTitle,chapterNo:quizData.info.chapterNo,studentId:quizData.info.id,attempt:quizData.info.attempt,score:quizData.score,totalQuestions:total,correctCount:correct,incorrectCount:total-correct,accuracy:rate,timestamp:new Date().toLocaleString('zh-TW',{hour12:false})};
-    const status=document.getElementById('statusMsg');if(!GAS_URL.startsWith('https://script.google.com/macros/s/AKfycbwZMlyZu0jB5gq72PTq_OxgG3OUOobIxbwuV1MRUfMSRGx6RnLnaqd0ok6IeTgZ9eKC/exec')){status.textContent='尚未設定 GAS 網址，資料未儲存。';status.style.color='#dc3545';return}
+    const status=document.getElementById('statusMsg');if(!GAS_URL.startsWith('https://script.google.com/')){status.textContent='尚未設定 GAS 網址，資料未儲存。';status.style.color='#dc3545';return}
     try{const formBody=new URLSearchParams();formBody.set('payload',JSON.stringify(payload));await fetch(GAS_URL,{method:'POST',mode:'no-cors',body:formBody});status.textContent='測驗結果已送出至 Google 試算表。'}catch(error){status.textContent='資料送出失敗，請通知老師。';status.style.color='#dc3545'}
   }
 </script>
