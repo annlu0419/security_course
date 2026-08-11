@@ -1,277 +1,75 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>影像處理 v3 - 模擬測驗系統</title>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            margin: 0; padding: 20px; min-height: 100vh;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .container {
-            background: white; padding: 40px; border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            width: 100%; max-width: 700px;
-        }
-        .header { text-align: center; border-bottom: 2px solid #edf2f7; padding-bottom: 20px; margin-bottom: 30px; }
-        h1 { color: #2d3748; margin: 0; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; color: #4a5568; }
-        input[type="text"], select {
-            width: 100%; padding: 12px; border: 2px solid #e2e8f0;
-            border-radius: 10px; font-size: 1em; box-sizing: border-box;
-        }
-        .radio-group { display: flex; gap: 15px; margin-top: 5px; }
-        .radio-item { cursor: pointer; padding: 10px 15px; background: #f7fafc; border: 2px solid #edf2f7; border-radius: 10px; }
-        .radio-item input { margin-right: 5px; }
-        
-        .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white; border: none; padding: 15px 30px;
-            font-size: 1.1em; border-radius: 50px; cursor: pointer;
-            width: 100%; margin-top: 20px; transition: 0.3s;
-        }
-        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
-        
-        /* 畫面切換 */
-        #quizScreen, #resultScreen { display: none; }
-        
-        .progress-bar { width: 100%; height: 8px; background: #edf2f7; border-radius: 4px; margin-bottom: 20px; overflow: hidden; }
-        .progress-fill { height: 100%; background: #667eea; width: 0%; transition: 0.3s; }
-        
-        .question-box { font-size: 1.2em; font-weight: 500; margin-bottom: 25px; line-height: 1.5; }
-        .option {
-            background: #f8f9fa; border: 2px solid #e2e8f0;
-            padding: 15px; border-radius: 12px; cursor: pointer;
-            margin-bottom: 12px; transition: 0.2s;
-        }
-        .option:hover { border-color: #667eea; background: #f0f4ff; }
-        .option.correct { background: #d4edda; border-color: #28a745; color: #155724; }
-        .option.incorrect { background: #f8d7da; border-color: #dc3545; color: #721c24; }
-        
-        .score-val { font-size: 3.5em; font-weight: bold; text-align: center; color: #667eea; margin: 10px 0; }
-        .result-table { background: #f8f9fa; border-radius: 15px; padding: 20px; margin: 20px 0; }
-        .result-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
-        #statusMsg { text-align: center; font-weight: bold; color: #28a745; margin-top: 10px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>電腦視覺課程前後測</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body{font-family:"Segoe UI","Microsoft JhengHei",sans-serif;background:linear-gradient(135deg,#f5f7fa,#c3cfe2);margin:0;padding:20px;min-height:100vh;display:flex;justify-content:center;align-items:center;color:#2d3748}
+    .container{background:#fff;padding:40px;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.1);width:100%;max-width:700px}.header{text-align:center;border-bottom:2px solid #edf2f7;padding-bottom:20px;margin-bottom:30px}h1{margin:0}.form-group{margin-bottom:20px}label{display:block;margin-bottom:8px;font-weight:600;color:#4a5568}input[type=text],select{width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:10px;font-size:1em;box-sizing:border-box}.radio-group{display:flex;gap:15px;margin-top:5px}.radio-item{cursor:pointer;padding:10px 15px;background:#f7fafc;border:2px solid #edf2f7;border-radius:10px}.radio-item input{margin-right:5px}.btn{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:0;padding:15px 30px;font-size:1.1em;border-radius:50px;cursor:pointer;width:100%;margin-top:20px;transition:.3s}.btn:hover{opacity:.9;transform:translateY(-2px)}.btn:disabled{opacity:.55;cursor:not-allowed;transform:none}#quizScreen,#resultScreen{display:none}.progress-bar{width:100%;height:8px;background:#edf2f7;border-radius:4px;margin-bottom:20px;overflow:hidden}.progress-fill{height:100%;background:#667eea;width:0;transition:.3s}.question-box{font-size:1.2em;font-weight:500;margin-bottom:25px;line-height:1.5}.option{background:#f8f9fa;border:2px solid #e2e8f0;padding:15px;border-radius:12px;cursor:pointer;margin-bottom:12px;transition:.2s}.option:hover{border-color:#667eea;background:#f0f4ff}.option.correct{background:#d4edda;border-color:#28a745;color:#155724}.option.incorrect{background:#f8d7da;border-color:#dc3545;color:#721c24}.score-val{font-size:3.5em;font-weight:bold;text-align:center;color:#667eea;margin:10px 0}.result-table{background:#f8f9fa;border-radius:15px;padding:20px;margin:20px 0}.result-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e2e8f0}.result-row:last-child{border-bottom:0}#statusMsg{text-align:center;font-weight:bold;color:#28a745;margin-top:10px}@media(max-width:560px){.container{padding:25px}.radio-group{flex-direction:column}}
+  </style>
 </head>
 <body>
-
 <div class="container">
-    <div class="header">
-        <h1 id="mainTitle">影像處理 模擬測驗</h1>
-    </div>
-
-    <div id="startScreen">
-        <div class="form-group">
-            <label>學號 *</label>
-            <input type="text" id="studentId" placeholder="例如: B11001001">
-        </div>
-        <div class="form-group">
-            <label>測驗次數 *</label>
-            <div class="radio-group">
-                <label class="radio-item"><input type="radio" name="attempt" value="1"> 第一次</label>
-                <label class="radio-item"><input type="radio" name="attempt" value="2"> 第二次</label>
-            </div>
-        </div>
-        <div class="form-group">
-            <label>選擇章節 *</label>
-            <select id="chapterSelect">
-                <option value="">-- 請選擇 --</option>
-                <script>
-                    for(let i=1; i<=14; i++) {
-                        document.write(`<option value="${i}">Chapter ${i < 10 ? '0'+i : i}</option>`);
-                    }
-                </script>
-            </select>
-        </div>
-        <button class="btn" onclick="initQuiz()">開始測驗</button>
-    </div>
-
-    <div id="quizScreen">
-        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-        <div id="qNum" style="color: #718096; margin-bottom: 10px;"></div>
-        <div class="question-box" id="qText"></div>
-        <div id="optionsGroup"></div>
-        <button class="btn" id="nextBtn" style="display:none;" onclick="handleNext()">下一題</button>
-    </div>
-
-    <div id="resultScreen">
-        <h2 style="text-align:center;">測驗完成！</h2>
-        <div class="score-val" id="finalScore">0</div>
-        
-        <div class="result-table" id="reportCard">
-            <div class="result-row"><span>學號</span><b id="resId"></b></div>
-            <div class="result-row"><span>章節</span><b id="resChap"></b></div>
-            <div class="result-row"><span>總題數</span><b id="resTotal"></b></div>
-            <div class="result-row"><span>答對題數</span><b id="resCorrect"></b></div>
-            <div class="result-row"><span>正確率</span><b id="resRate"></b></div>
-        </div>
-        
-        <div id="statusMsg">正在自動同步成績至雲端...</div>
-        <button class="btn" onclick="location.reload()">回首頁</button>
-    </div>
+  <div class="header"><h1 id="mainTitle">電腦視覺課程前後測</h1></div>
+  <div id="startScreen">
+    <div class="form-group"><label for="studentId">學號 *</label><input type="text" id="studentId" placeholder="例如：B11001001"></div>
+    <div class="form-group"><label>測驗類型 *</label><div class="radio-group"><label class="radio-item"><input type="radio" name="attempt" value="前測">前測</label><label class="radio-item"><input type="radio" name="attempt" value="後測">後測</label></div></div>
+    <div class="form-group"><label for="chapterSelect">課程章節 *</label><select id="chapterSelect"><option value="">-- 請選擇章節 --</option></select></div>
+    <button class="btn" id="startBtn" onclick="initQuiz()">開始測驗</button>
+  </div>
+  <div id="quizScreen">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div><div id="qNum" style="color:#718096;margin-bottom:10px"></div><div class="question-box" id="qText"></div><div id="optionsGroup"></div><button class="btn" id="nextBtn" style="display:none" onclick="handleNext()">下一題</button>
+  </div>
+  <div id="resultScreen">
+    <h2 style="text-align:center">測驗完成！</h2><div class="score-val" id="finalScore">0 分</div>
+    <div class="result-table"><div class="result-row"><span>學號</span><b id="resId"></b></div><div class="result-row"><span>測驗類型</span><b id="resAttempt"></b></div><div class="result-row"><span>章節</span><b id="resChap"></b></div><div class="result-row"><span>總題數</span><b id="resTotal"></b></div><div class="result-row"><span>答對題數</span><b id="resCorrect"></b></div><div class="result-row"><span>正確率</span><b id="resRate"></b></div></div>
+    <div id="statusMsg">正在儲存測驗結果…</div><button class="btn" onclick="location.reload()">重新測驗</button>
+  </div>
 </div>
-
 <script>
-    // --- 雲端設定 ---
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbw9lZ_a2WGvcN97zElBdnOcNmbMMJQDnogok2-VsTI8xbmoCZOSacGl6H-VfwdmxBvK/exec";
+  // 部署 Code.gs 後，將下方內容換成新的 GAS 網頁應用程式 /exec 網址。
+  const GAS_URL = "請貼上新的_GAS_網頁應用程式網址";
+  const quizData={allQ:[],currentIdx:0,score:0,correctCount:0,userAnswers:[],info:{}};
+  const chapterSelect=document.getElementById('chapterSelect');
+  for(let i=1;i<=14;i++){const option=document.createElement('option');option.value=i;option.textContent=`Chapter ${String(i).padStart(2,'0')}`;chapterSelect.appendChild(option)}
 
-    let quizData = {
-        allQ: [],
-        currentIdx: 0,
-        score: 0,
-        correctCount: 0,
-        userAnswers: [],
-        info: {}
-    };
-
-    async function initQuiz() {
-        const id = document.getElementById('studentId').value.trim();
-        const att = document.querySelector('input[name="attempt"]:checked');
-        const ch = document.getElementById('chapterSelect').value;
-
-        if(!id || !att || !ch) return alert("請完整填寫學號、次數與章節");
-
-        quizData.info = { id, attempt: att.value, chapterNo: ch };
-
-        try {
-            const response = await fetch(`chapter${ch}.xlsx`);
-            const arrayBuffer = await response.arrayBuffer();
-            const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
-            // 讀取 Excel 第一列的標題資訊
-            quizData.info.chapterTitle = rows[0][3] || `Chapter ${ch}`;
-            document.getElementById('mainTitle').textContent = quizData.info.chapterTitle;
-
-            // 處理題目 (從第三列開始)
-            const rawQuestions = rows.slice(2).map(r => ({
-                q: r[0],
-                options: [r[1], r[2], r[3], r[4]],
-                ans: parseInt(r[5]) - 1
-            })).filter(item => item.q);
-
-            // 隨機抽 20 題
-            quizData.allQ = rawQuestions.sort(() => 0.5 - Math.random()).slice(0, 20);
-            
-            document.getElementById('startScreen').style.display = 'none';
-            document.getElementById('quizScreen').style.display = 'block';
-            renderQuestion();
-
-        } catch (e) {
-            alert("讀取題庫失敗，請確認 chapter" + ch + ".xlsx 檔案是否存在。");
-        }
-    }
-
-    function renderQuestion() {
-        const q = quizData.allQ[quizData.currentIdx];
-        document.getElementById('qNum').textContent = `題目 ${quizData.currentIdx + 1} / ${quizData.allQ.length}`;
-        document.getElementById('qText').textContent = q.q;
-        document.getElementById('nextBtn').style.display = 'none';
-        
-        const group = document.getElementById('optionsGroup');
-        group.innerHTML = '';
-
-        q.options.forEach((opt, i) => {
-            if(!opt) return;
-            const div = document.createElement('div');
-            div.className = 'option';
-            div.textContent = opt;
-            div.onclick = () => selectOption(div, i, q.ans);
-            group.appendChild(div);
-        });
-
-        const progress = ((quizData.currentIdx + 1) / quizData.allQ.length) * 100;
-        document.getElementById('progressFill').style.width = progress + '%';
-    }
-
-    function selectOption(el, picked, correct) {
-        if (quizData.userAnswers[quizData.currentIdx] !== undefined) return;
-        
-        quizData.userAnswers[quizData.currentIdx] = picked;
-        const allOptions = document.querySelectorAll('.option');
-
-        if (picked === correct) {
-            el.classList.add('correct');
-            quizData.score += 5;
-            quizData.correctCount++;
-        } else {
-            el.classList.add('incorrect');
-            allOptions[correct].classList.add('correct');
-        }
-
-        document.getElementById('nextBtn').style.display = 'block';
-        if (quizData.currentIdx === quizData.allQ.length - 1) {
-            document.getElementById('nextBtn').textContent = "查看結算成績";
-        }
-    }
-
-    function handleNext() {
-        if (quizData.currentIdx < quizData.allQ.length - 1) {
-            quizData.currentIdx++;
-            renderQuestion();
-        } else {
-            showFinalResult();
-        }
-    }
-
-    async function showFinalResult() {
-        document.getElementById('quizScreen').style.display = 'none';
-        document.getElementById('resultScreen').style.display = 'block';
-
-        const total = quizData.allQ.length;
-        const correct = quizData.correctCount;
-        const rate = ((correct / total) * 100).toFixed(1) + "%";
-
-        document.getElementById('finalScore').textContent = quizData.score + "分";
-        document.getElementById('resId').textContent = quizData.info.id;
-        document.getElementById('resChap').textContent = quizData.info.chapterTitle;
-        document.getElementById('resTotal').textContent = total + " 題";
-        document.getElementById('resCorrect').textContent = correct + " 題";
-        document.getElementById('resRate').textContent = rate;
-
-        // --- 準備傳送到 Google Sheets 的資料包 ---
-        // 順序：章節, 學號, 測驗次數, 分數, 總題數, 答對, 答錯, 正確率, 上傳時間
-        const payload = {
-            chapter: quizData.info.chapterTitle,
-            studentId: quizData.info.id,
-            attempt: quizData.info.attempt,
-            score: quizData.score,
-            totalQuestions: total,
-            correctCount: correct,
-            incorrectCount: total - correct,
-            accuracy: rate,
-            timestamp: new Date().toLocaleString('zh-TW', { hour12: false })
-        };
-
-        try {
-            // Apps Script Web App 使用表單欄位接收 JSON，可避免 application/json 的預檢問題。
-            const formBody = new URLSearchParams();
-            formBody.set('payload', JSON.stringify(payload));
-
-            await fetch(GAS_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: formBody
-            });
-            document.getElementById('statusMsg').textContent = "✅ 成績已送出至 Google 試算表";
-        } catch (e) {
-            document.getElementById('statusMsg').textContent = "⚠️ 雲端同步失敗，請手動截圖成績";
-            document.getElementById('statusMsg').style.color = "red";
-        }
-    }
+  async function initQuiz(){
+    const id=document.getElementById('studentId').value.trim();
+    const attempt=document.querySelector('input[name="attempt"]:checked');
+    const chapter=document.getElementById('chapterSelect').value;
+    if(!id||!attempt||!chapter){alert('請完整填寫學號、測驗類型與課程章節。');return}
+    const startBtn=document.getElementById('startBtn');startBtn.disabled=true;startBtn.textContent='正在載入題庫…';
+    quizData.info={id,attempt:attempt.value,chapterNo:chapter};
+    try{
+      const response=await fetch(`chapter${chapter}.xlsx`);
+      if(!response.ok)throw new Error(`HTTP ${response.status}`);
+      const workbook=XLSX.read(await response.arrayBuffer(),{type:'array'});
+      const sheet=workbook.Sheets[workbook.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(sheet,{header:1});
+      quizData.info.chapterTitle=rows[0]&&rows[0][3]?rows[0][3]:`Chapter ${chapter}`;
+      document.getElementById('mainTitle').textContent=`電腦視覺課程｜${quizData.info.chapterTitle}`;
+      const rawQuestions=rows.slice(2).map(r=>({q:r[0],options:[r[1],r[2],r[3],r[4]],ans:parseInt(r[5],10)-1})).filter(item=>item.q&&Number.isInteger(item.ans));
+      if(!rawQuestions.length)throw new Error('題庫沒有有效題目');
+      quizData.allQ=rawQuestions.sort(()=>.5-Math.random()).slice(0,20);
+      document.getElementById('startScreen').style.display='none';document.getElementById('quizScreen').style.display='block';renderQuestion();
+    }catch(error){alert(`無法讀取 chapter${chapter}.xlsx，請確認檔案存在且格式正確。`);startBtn.disabled=false;startBtn.textContent='開始測驗'}
+  }
+  function renderQuestion(){
+    const q=quizData.allQ[quizData.currentIdx];document.getElementById('qNum').textContent=`題目 ${quizData.currentIdx+1} / ${quizData.allQ.length}`;document.getElementById('qText').textContent=q.q;document.getElementById('nextBtn').style.display='none';
+    const group=document.getElementById('optionsGroup');group.innerHTML='';q.options.forEach((opt,i)=>{if(!opt)return;const div=document.createElement('div');div.className='option';div.textContent=opt;div.onclick=()=>selectOption(div,i,q.ans);group.appendChild(div)});document.getElementById('progressFill').style.width=`${((quizData.currentIdx+1)/quizData.allQ.length)*100}%`;
+  }
+  function selectOption(element,picked,correct){
+    if(quizData.userAnswers[quizData.currentIdx]!==undefined)return;quizData.userAnswers[quizData.currentIdx]=picked;const options=document.querySelectorAll('.option');if(picked===correct){element.classList.add('correct');quizData.score+=5;quizData.correctCount++}else{element.classList.add('incorrect');if(options[correct])options[correct].classList.add('correct')}const next=document.getElementById('nextBtn');next.style.display='block';if(quizData.currentIdx===quizData.allQ.length-1)next.textContent='完成並儲存';
+  }
+  function handleNext(){if(quizData.currentIdx<quizData.allQ.length-1){quizData.currentIdx++;renderQuestion()}else showFinalResult()}
+  async function showFinalResult(){
+    document.getElementById('quizScreen').style.display='none';document.getElementById('resultScreen').style.display='block';const total=quizData.allQ.length;const correct=quizData.correctCount;const rate=`${((correct/total)*100).toFixed(1)}%`;document.getElementById('finalScore').textContent=`${quizData.score} 分`;document.getElementById('resId').textContent=quizData.info.id;document.getElementById('resAttempt').textContent=quizData.info.attempt;document.getElementById('resChap').textContent=quizData.info.chapterTitle;document.getElementById('resTotal').textContent=`${total} 題`;document.getElementById('resCorrect').textContent=`${correct} 題`;document.getElementById('resRate').textContent=rate;
+    const payload={chapter:quizData.info.chapterTitle,chapterNo:quizData.info.chapterNo,studentId:quizData.info.id,attempt:quizData.info.attempt,score:quizData.score,totalQuestions:total,correctCount:correct,incorrectCount:total-correct,accuracy:rate,timestamp:new Date().toLocaleString('zh-TW',{hour12:false})};
+    const status=document.getElementById('statusMsg');if(!GAS_URL.startsWith('https://script.google.com/macros/s/AKfycbwZMlyZu0jB5gq72PTq_OxgG3OUOobIxbwuV1MRUfMSRGx6RnLnaqd0ok6IeTgZ9eKC/exec')){status.textContent='尚未設定 GAS 網址，資料未儲存。';status.style.color='#dc3545';return}
+    try{const formBody=new URLSearchParams();formBody.set('payload',JSON.stringify(payload));await fetch(GAS_URL,{method:'POST',mode:'no-cors',body:formBody});status.textContent='測驗結果已送出至 Google 試算表。'}catch(error){status.textContent='資料送出失敗，請通知老師。';status.style.color='#dc3545'}
+  }
 </script>
-
 </body>
 </html>
-
-
