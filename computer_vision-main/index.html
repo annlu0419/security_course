@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>電腦視覺課程前後測</title>
+  <title>電腦視覺課程前後測 v2</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     body{font-family:"Segoe UI","Microsoft JhengHei",sans-serif;background:linear-gradient(135deg,#f5f7fa,#c3cfe2);margin:0;padding:20px;min-height:100vh;display:flex;justify-content:center;align-items:center;color:#2d3748}
@@ -30,7 +30,7 @@
 </div>
 <script>
   // 部署 Code.gs 後，將下方內容換成新的 GAS 網頁應用程式 /exec 網址。
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbwZMlyZu0jB5gq72PTq_OxgG3OUOobIxbwuV1MRUfMSRGx6RnLnaqd0ok6IeTgZ9eKC/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbxD7brSqmYqVEV9vF9gUjrsf5cmvDWu2tXueW86JO1KNAqVVb-z-wmTjVpLiDm0AysW/exec";
   const quizData={allQ:[],currentIdx:0,score:0,correctCount:0,userAnswers:[],info:{}};
   const chapterSelect=document.getElementById('chapterSelect');
   for(let i=1;i<=14;i++){const option=document.createElement('option');option.value=i;option.textContent=`Chapter ${String(i).padStart(2,'0')}`;chapterSelect.appendChild(option)}
